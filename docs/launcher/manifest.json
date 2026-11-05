@@ -1,0 +1,27 @@
+{
+  "name": "Quản lý phòng tập",
+  "short_name": "Phòng tập",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "https://res.cloudinary.com/uxvmo47y/image/upload/f_png/q_auto/c_fill,h_180,w_180/logo",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "https://res.cloudinary.com/uxvmo47y/image/upload/f_png/q_auto/c_fill,h_192,w_192/logo",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://res.cloudinary.com/uxvmo47y/image/upload/f_png/q_auto/c_fill,h_512,w_512/logo",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "tsn-app-launcher",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Static GitHub Pages launcher for the TSN web app",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/run-tests.js",
+    "app-icon:check": "node tools/check-icon.js",
+    "app-icon:launcher": "node tools/build-launcher.js",
+    "pages:build": "node tools/build-pages.js"
+  }
+}

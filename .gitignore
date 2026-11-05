@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# clasp credentials — full Apps Script access, never commit
+.clasprc.json
+.clasprc.json.*
+.clasp.json.bak
+
+# Generated GitHub Pages output (built by `npm run pages:build`)
+_site/
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Coverage / test output
+coverage/
+*.lcov
+.tsn-v8cov/
+
+# Throwaway verification logs and generated reports
+VERIFY-*.txt
+TEST-REPORT.txt
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
