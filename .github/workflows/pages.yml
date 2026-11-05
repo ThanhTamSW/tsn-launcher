@@ -45,6 +45,10 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          # A brand-new repository has Pages disabled, and configure-pages fails
+          # with "Get Pages site failed" unless it may create the site itself.
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

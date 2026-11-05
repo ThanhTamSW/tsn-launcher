@@ -119,6 +119,18 @@ test('the Pages workflow tests before publishing and deploys an artifact', () =>
   assert.match(text, /path:\s*_site/, 'must upload the built folder, not the repo root');
 });
 
+test('the Pages workflow can enable Pages on a fresh repository', () => {
+  const text = read(path.join('.github', 'workflows', 'pages.yml'));
+
+  // A brand-new repo has Pages disabled; configure-pages fails with
+  // "Get Pages site failed" unless it is allowed to create the site.
+  assert.match(
+    text,
+    /configure-pages@[\s\S]*?enablement:\s*true/,
+    'must let configure-pages create the Pages site so the first run succeeds'
+  );
+});
+
 test('the Pages workflow only publishes from main and declares the needed permissions', () => {
   const text = read(path.join('.github', 'workflows', 'pages.yml'));
 
