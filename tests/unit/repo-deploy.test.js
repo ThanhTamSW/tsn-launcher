@@ -119,25 +119,43 @@ test('the Pages workflow tests before publishing and deploys an artifact', () =>
   assert.match(text, /path:\s*_site/, 'must upload the built folder, not the repo root');
 });
 
+test('the Pages workflow explains that Pages must be enabled by a human', () => {
+  const text = read(path.join('.github', 'workflows', 'pages.yml'));
+
+  // GITHUB_TOKEN cannot create a Pages site: the API answers
+  // "Resource not accessible by integration". `enablement: true` therefore only
+  // produces a confusing failure, so the workflow must not rely on it and must
+  // point the maintainer at the one-time manual switch instead.
+  assert.equal(
+    /enablement:\s*true/.test(text),
+    false,
+    'enablement: true hides the real cause with "Resource not accessible by integration"'
+  );
+  assert.match(text, /settings\/pages/, 'must link the one-time Pages switch');
+  assert.match(text, /Source[\s\S]*GitHub Actions|GitHub Actions[\s\S]*Source/, 'must say which Source to pick');
+});
+
 test('the Pages workflow can enable Pages on a fresh repository', () => {
   const text = read(path.join('.github', 'workflows', 'pages.yml'));
 
-  // A brand-new repo has Pages disabled; configure-pages fails with
-  // "Get Pages site failed" unless it is allowed to create the site.
+  // Pages must be enabled once by a maintainer; the workflow documents it and
+  // no longer pretends the token can do it.
   assert.match(
     text,
-    /configure-pages@[\s\S]*?enablement:\s*true/,
-    'must let configure-pages create the Pages site so the first run succeeds'
+    /settings\/pages|enablement/i,
+    'must either document the manual switch or enable it explicitly'
   );
 });
 
 test('the Pages workflow only publishes from main and declares the needed permissions', () => {
   const text = read(path.join('.github', 'workflows', 'pages.yml'));
 
-  // This repo is standalone: its default and only branch is `main`.
-  // (The split repo used `launcher`; keeping that here would disable Pages.)
-  assert.match(text, /branches:\s*(\[[^\]]*main[^\]]*\]|[\s\S]*?-\s*main)/, 'must be limited to the main branch');
-  assert.equal(/-\s*launcher\b/.test(text), false, 'must not wait for a launcher branch that does not exist here');
+  // Only inspect the `on.push.branches` list, not prose in comments: the repo
+  // URL itself contains the word "launcher".
+  const block = text.slice(text.indexOf('on:'), text.indexOf('permissions:'));
+  const branchLines = block.split(/\r?\n/).filter(line => /^\s*-\s+\S+/.test(line)).map(line => line.trim());
+  assert.deepEqual(branchLines, ['- main'], 'must publish from main only');
+
   assert.match(text, /pages:\s*write/, 'must request pages: write');
   assert.match(text, /id-token:\s*write/, 'must request id-token: write for OIDC deploy');
   assert.match(text, /concurrency:/, 'must not run overlapping deployments');
