@@ -122,7 +122,10 @@ test('the Pages workflow tests before publishing and deploys an artifact', () =>
 test('the Pages workflow only publishes from main and declares the needed permissions', () => {
   const text = read(path.join('.github', 'workflows', 'pages.yml'));
 
-  assert.match(text, /branches:\s*(\[[^\]]*launcher[^\]]*\]|[\s\S]*?-\s*launcher)/, 'must be limited to the launcher branch');
+  // This repo is standalone: its default and only branch is `main`.
+  // (The split repo used `launcher`; keeping that here would disable Pages.)
+  assert.match(text, /branches:\s*(\[[^\]]*main[^\]]*\]|[\s\S]*?-\s*main)/, 'must be limited to the main branch');
+  assert.equal(/-\s*launcher\b/.test(text), false, 'must not wait for a launcher branch that does not exist here');
   assert.match(text, /pages:\s*write/, 'must request pages: write');
   assert.match(text, /id-token:\s*write/, 'must request id-token: write for OIDC deploy');
   assert.match(text, /concurrency:/, 'must not run overlapping deployments');

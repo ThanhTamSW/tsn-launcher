@@ -9,7 +9,7 @@ name: pages
 on:
   push:
     branches:
-      - launcher
+      - main
   workflow_dispatch:
 
 permissions:
