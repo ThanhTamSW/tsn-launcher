@@ -8,6 +8,8 @@
     "test": "node tests/run-tests.js",
     "app-icon:check": "node tools/check-icon.js",
     "app-icon:launcher": "node tools/build-launcher.js",
-    "pages:build": "node tools/build-pages.js"
+    "pages:build": "node tools/build-pages.js",
+    "pages:publish": "node tools/publish-root.js",
+    "pages:check": "node tools/publish-root.js --check"
   }
 }

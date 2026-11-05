@@ -76,14 +76,13 @@ test('the deployment runbook names the repository and the live Pages URL', () =>
   assert.ok(text.includes(PAGES_URL), 'must name the live URL ' + PAGES_URL);
 });
 
-test('the deployment runbook documents building, committing and enabling Pages', () => {
+test('the deployment runbook documents publishing, committing and enabling Pages', () => {
   const text = read(path.join('docs', 'deploy-pages.md'));
 
-  assert.match(text, /pages:build/, 'must document npm run pages:build');
-  assert.match(text, /_site/, 'must name the published folder');
+  assert.match(text, /pages:publish/, 'must document npm run pages:publish');
   assert.match(text, /git (add|commit|push)/, 'must document committing the site');
   assert.match(text, /Settings.*Pages|Pages.*Settings/is, 'must explain where Pages is enabled');
-  assert.match(text, /deploy from a branch|branch/i, 'must state the Pages source (branch/folder)');
+  assert.match(text, /deploy from a branch/i, 'must state the Pages source (branch mode)');
 });
 
 test('the deployment runbook links the launcher and icon runbooks', () => {
@@ -104,59 +103,21 @@ test('the README points a new maintainer at the tests and the deploy runbook', (
   const text = read('README.md');
   assert.match(text, /npm test/, 'must document the test command');
   assert.match(text, /deploy-pages\.md/, 'must link the deployment runbook');
-  assert.match(text, /pages:build/, 'must document the pages build command');
+  assert.match(text, /pages:publish/, 'must document the root publish command');
 });
 
 /* --------------------------- CI workflow --------------------------- */
 
-test('the Pages workflow tests before publishing and deploys an artifact', () => {
-  const text = read(path.join('.github', 'workflows', 'pages.yml'));
-
-  assert.match(text, /npm test/, 'the site must not publish on a red test suite');
-  assert.match(text, /pages:build/, 'must build the site with the tested tool');
-  assert.match(text, /actions\/upload-pages-artifact/, 'must upload the built site as an artifact');
-  assert.match(text, /actions\/deploy-pages/, 'must deploy with the Pages action');
-  assert.match(text, /path:\s*_site/, 'must upload the built folder, not the repo root');
-});
-
-test('the Pages workflow explains that Pages must be enabled by a human', () => {
-  const text = read(path.join('.github', 'workflows', 'pages.yml'));
-
-  // GITHUB_TOKEN cannot create a Pages site: the API answers
-  // "Resource not accessible by integration". `enablement: true` therefore only
-  // produces a confusing failure, so the workflow must not rely on it and must
-  // point the maintainer at the one-time manual switch instead.
+test('no Pages workflow is needed: branch mode serves the committed root', () => {
+  // The Actions-based publisher cannot bootstrap itself: GITHUB_TOKEN may not
+  // create a Pages site ("Resource not accessible by integration"), and the
+  // repository must additionally be switched to "GitHub Actions" mode by hand.
+  // "Deploy from a branch" needs neither, so the workflow is gone and the site
+  // is published to the repo root instead.
   assert.equal(
-    /enablement:\s*true/.test(text),
+    fs.existsSync(path.join(ROOT, '.github', 'workflows', 'pages.yml')),
     false,
-    'enablement: true hides the real cause with "Resource not accessible by integration"'
+    'an Actions Pages workflow only fails on a fresh repo; use branch mode'
   );
-  assert.match(text, /settings\/pages/, 'must link the one-time Pages switch');
-  assert.match(text, /Source[\s\S]*GitHub Actions|GitHub Actions[\s\S]*Source/, 'must say which Source to pick');
-});
-
-test('the Pages workflow can enable Pages on a fresh repository', () => {
-  const text = read(path.join('.github', 'workflows', 'pages.yml'));
-
-  // Pages must be enabled once by a maintainer; the workflow documents it and
-  // no longer pretends the token can do it.
-  assert.match(
-    text,
-    /settings\/pages|enablement/i,
-    'must either document the manual switch or enable it explicitly'
-  );
-});
-
-test('the Pages workflow only publishes from main and declares the needed permissions', () => {
-  const text = read(path.join('.github', 'workflows', 'pages.yml'));
-
-  // Only inspect the `on.push.branches` list, not prose in comments: the repo
-  // URL itself contains the word "launcher".
-  const block = text.slice(text.indexOf('on:'), text.indexOf('permissions:'));
-  const branchLines = block.split(/\r?\n/).filter(line => /^\s*-\s+\S+/.test(line)).map(line => line.trim());
-  assert.deepEqual(branchLines, ['- main'], 'must publish from main only');
-
-  assert.match(text, /pages:\s*write/, 'must request pages: write');
-  assert.match(text, /id-token:\s*write/, 'must request id-token: write for OIDC deploy');
-  assert.match(text, /concurrency:/, 'must not run overlapping deployments');
+  assert.ok(fs.existsSync(path.join(ROOT, 'index.html')), 'the site root must be committed');
 });

@@ -4,10 +4,7 @@ Static GitHub Pages site for the web app home-screen shortcut.
 
 - Live URL: https://thanhtamsw.github.io/tsn-launcher/
 - Repo: https://github.com/ThanhTamSW/tsn-launcher
-- Page: `index.html` (keeps the `apple-touch-icon` metadata and redirects
-  top-level to the deployed Apps Script web app).
-- Icons: `icons/` (180, 192, 512 PNG).
-- Manifest: `manifest.json` (`start_url` and `scope` stay `./`, same origin).
+- Site root: `index.html`, `manifest.json`, `.nojekyll`, `icons/`
 
 This repository holds **only the shortcut site**. It contains no Apps Script
 source: `Code.js` and `UI.html` live in the private `tsn-app` repository.
@@ -21,15 +18,29 @@ which carries the icon metadata and then redirects to `/exec` in standalone mode
 In a normal browser tab it deliberately stays put, because the phone snapshots
 the icon at the moment the shortcut is created.
 
-## Test & build
+## Pages mode: "Deploy from a branch"
+
+This repo uses **Deploy from a branch** (Settings → Pages → Source). It needs no
+workflow and no token permissions, so it works on a fresh repository
+immediately.
+
+An Actions-based publisher was tried and removed: `GITHUB_TOKEN` is not allowed
+to create a Pages site ("Resource not accessible by integration"), so every run
+failed with an opaque error until a human switched the repo to Actions mode.
+Branch mode has no such bootstrap problem.
+
+## Test & publish
 
 ```bash
 npm install
-npm test          # launcher, icon and Pages contract tests
-npm run pages:build
+npm test              # launcher, icon, publish and repo contract tests
+npm run pages:publish # copy the servable files to the repo root
+npm run pages:check   # fail if the committed root copy is stale
 ```
 
-`_site/` is generated and never committed. The Pages workflow runs the suite,
-builds the site, and publishes it from `main`.
+`npm run pages:publish` writes `index.html`, `manifest.json`, `.nojekyll` and
+`icons/*.png` to the repo root — exactly what branch mode serves. Everything
+else (`docs/`, `tools/`, `tests/`, `assets/`) stays for maintenance but is not
+part of the site.
 
 Runbook: [`docs/deploy-pages.md`](docs/deploy-pages.md).

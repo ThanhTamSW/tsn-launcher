@@ -3,9 +3,8 @@
 Repo: <https://github.com/ThanhTamSW/tsn-launcher>
 Trang launcher: <https://thanhtamsw.github.io/tsn-launcher/>
 
-Repo này **chỉ chứa trang shortcut** (launcher) cho icon màn hình chính. Nó
-không chứa `Code.js` / `UI.html` — mã nguồn Apps Script nằm ở repo riêng
-`tsn-app` (private).
+Repo này **chỉ chứa trang shortcut** (launcher). Nó không chứa `Code.js` /
+`UI.html` — mã nguồn Apps Script nằm ở repo riêng `tsn-app` (private).
 
 ## Trang launcher là gì
 
@@ -14,34 +13,39 @@ Apps Script không thể cung cấp icon màn hình chính:
 - `<head>` của web app do Google sinh ra, **không có** `apple-touch-icon`;
 - web app **từ chối** render trong `<iframe>` khác origin (lỗi HTTP 401).
 
-Nên shortcut trỏ về trang này. Trang giữ metadata icon (`apple-touch-icon`,
-`manifest.json`), rồi:
+Nên shortcut trỏ về trang này. Trang giữ metadata icon rồi:
 
 - **chế độ standalone** (mở từ icon trên màn hình chính) → tự chuyển sang `/exec`;
 - **tab trình duyệt thường** (đang tạo shortcut) → **đứng yên**, vì điện thoại
   chụp icon tại đúng thời điểm tạo shortcut.
 
-Danh sách file:
+## Cấu trúc
 
-| File | Vai trò |
+| Đường dẫn | Vai trò |
 |---|---|
-| `docs/launcher/index.html` | Trang redirect + metadata icon (nguồn) |
-| `docs/launcher/manifest.json` | `start_url`/`scope` = `./`, 3 icon |
+| `docs/launcher/index.html` | **Nguồn** trang redirect + metadata icon |
+| `docs/launcher/manifest.json` | **Nguồn** manifest (`start_url`/`scope` = `./`) |
 | `assets/app-icon-*.png` | Icon 180/192/512 đã kiểm hợp lệ |
-| `tools/build-pages.js` | Sinh `_site/` đã kiểm (dùng trong CI) |
+| `tools/publish-root.js` | Chép file servable ra **gốc repo** |
+| `tools/build-pages.js` | Sinh `_site/` để kiểm tra trước khi publish |
 
-## Bật Pages lần đầu (chỉ làm một lần)
+Ở gốc repo (thứ Pages thực sự phục vụ): `index.html`, `manifest.json`,
+`.nojekyll`, `icons/*.png`.
+
+## Bật Pages lần đầu — chọn **Deploy from a branch**
 
 1. Mở <https://github.com/ThanhTamSW/tsn-launcher/settings/pages>
-2. Mục **Source** → chọn **GitHub Actions**
-3. Không cần chọn branch
+2. Mục **Source** → chọn **Deploy from a branch**
+3. Mục **Branch** → chọn **`main`** và folder **`/ (root)`**
+4. Bấm **Save**
 
-Sau đó mỗi lần push lên `main`, workflow `.github/workflows/pages.yml` sẽ chạy
-`npm test` → `npm run pages:build` → deploy. **Site không publish nếu test đỏ.**
+Chờ khoảng 1 phút. **Không** chọn "GitHub Actions": chế độ đó cần workflow và
+`GITHUB_TOKEN` không được phép tự tạo Pages site
+(`Resource not accessible by integration`), nên sẽ fail ngay lần đầu.
 
 ## Quy trình cập nhật
 
-Nếu đổi deployment ID hoặc icon, sinh lại launcher rồi build:
+Nếu đổi deployment ID hoặc icon, sinh lại launcher rồi publish:
 
 ```bash
 npm run app-icon:launcher -- \
@@ -50,36 +54,35 @@ npm run app-icon:launcher -- \
   --out docs/launcher
 
 npm test
-npm run pages:build
+npm run pages:publish
 git add -A
 git commit -m "chore: cập nhật launcher"
 git push
 ```
 
-Workflow tự chạy lại và deploy trong khoảng 1 phút.
+Pages tự phục vụ bản mới sau ~1 phút (branch mode không cần build).
 
-## Liên quan
-
-- Icon và kích thước ảnh: [`app-icon.md`](app-icon.md).
-- Bản thân web app (Apps Script) **không** deploy bằng repo này; mã nguồn ở repo
-  private `tsn-app` và được đẩy bằng `npx clasp push`. Repo launcher này chỉ
-  phục vụ trang shortcut.
-
-## Kiểm tra sau khi deploy
+## Kiểm tra sau khi bật Pages
 
 | Việc | Kỳ vọng |
 |---|---|
 | Mở <https://thanhtamsw.github.io/tsn-launcher/> trên điện thoại | Hiện màn hình logo xanh, **không** tự nhảy sang web app |
-| Bấm Chia sẻ → Thêm vào màn hình chính | Icon là logo phòng tập, không phải icon Google |
+| Bấm Chia sẻ → Thêm vào màn hình chính | Icon là logo phòng tập |
 | Bấm icon trên màn hình chính | Tự mở web app |
 | Mở `/tsn-launcher/Code.js` | Phải **404** (repo không chứa source) |
+
+## Liên quan
+
+- Icon và kích thước ảnh: [`app-icon.md`](app-icon.md).
+- Web app (Apps Script) **không** deploy bằng repo này; mã nguồn ở repo private
+  `tsn-app` và đẩy bằng `npx clasp push`.
 
 ## Xử lý sự cố
 
 | Triệu chứng | Nguyên nhân | Cách sửa |
 |---|---|---|
-| Site 404 | Pages chưa bật | Làm mục "Bật Pages lần đầu" |
-| Workflow fail ở "Configure Pages" | Pages chưa bật | Bật Pages rồi chạy lại workflow |
+| Site 404 | Pages chưa bật, hoặc chọn sai Branch | Settings → Pages → branch `main`, folder `/ (root)` |
+| Trang hiện danh sách file (không phải launcher) | Thiếu `index.html` ở gốc | Chạy `npm run pages:publish` rồi push |
 | Icon vẫn mặc định | Shortcut cũ chưa xoá | Xoá shortcut, thêm lại từ URL launcher |
-| Trang tự nhảy sang app khi đang tạo shortcut | Dùng bản launcher cũ (redirect vô điều kiện) | Push lại `docs/launcher/index.html` mới |
-| Test đỏ | Launcher/manifest lệch | Chạy `npm test` xem file nào sai |
+| Trang tự nhảy khi đang tạo shortcut | `index.html` ở gốc là bản cũ | `npm run pages:publish` rồi push |
+| Test đỏ | Root lệch nguồn | `npm run pages:check` xem file nào, rồi publish |
