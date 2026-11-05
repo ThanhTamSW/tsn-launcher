@@ -81,8 +81,8 @@ test('package.json exposes the pages build script', () => {
   assert.equal(PKG.scripts['pages:build'], 'node tools/build-pages.js');
 });
 
-test('the publish URL points at the tsn-app Pages site', () => {
-  assert.equal(PAGES_SITE_URL, 'https://thanhtamsw.github.io/tsn-app/');
+test('the publish URL points at the tsn-launcher Pages site', () => {
+  assert.equal(PAGES_SITE_URL, 'https://thanhtamsw.github.io/tsn-launcher/');
 });
 
 /* ------------------------------ output ------------------------------ */
@@ -142,7 +142,7 @@ test('the README explains the live URL and how to rebuild', (t) => {
   const result = buildPagesSite({ root: ROOT, outDir: outDir(t) });
   const readme = fs.readFileSync(path.join(result.outDir, 'README.md'), 'utf8');
 
-  assert.match(readme, /https:\/\/thanhtamsw\.github\.io\/tsn-app\//);
+  assert.match(readme, /https:\/\/thanhtamsw\.github\.io\/tsn-launcher\//);
   assert.match(readme, /pages:build/);
   assert.match(readme, /index\.html/);
   assert.match(readme, /icons\//);

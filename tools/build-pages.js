@@ -32,7 +32,7 @@ const { checkIcons, ICON_SIZES } = require('./check-icon');
 
 const ROOT = path.join(__dirname, '..');
 
-const PAGES_SITE_URL = 'https://thanhtamsw.github.io/tsn-app/';
+const PAGES_SITE_URL = 'https://thanhtamsw.github.io/tsn-launcher/';
 
 /** Files written before the icons, in build order. */
 const PAGES_SITE_FILES_BEFORE_ICONS = ['index.html', 'manifest.json', 'README.md', '.nojekyll'];

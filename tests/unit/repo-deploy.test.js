@@ -3,7 +3,7 @@
 /**
  * Phase 7 — repository and deployment contract.
  *
- * The project is published to `github.com/ThanhTamSW/tsn-app`, which is
+ * The project is published to `github.com/ThanhTamSW/tsn-launcher`, which is
  * also the GitHub Pages host for the launcher. That means the repo itself is
  * the deployment artifact, so two things must be guaranteed by tests:
  *
@@ -22,8 +22,8 @@ const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..', '..');
 
-const REPO_URL = 'https://github.com/ThanhTamSW/tsn-app';
-const PAGES_URL = 'https://thanhtamsw.github.io/tsn-app/';
+const REPO_URL = 'https://github.com/ThanhTamSW/tsn-launcher';
+const PAGES_URL = 'https://thanhtamsw.github.io/tsn-launcher/';
 
 function read(rel) {
   const file = path.join(ROOT, rel);

@@ -1,5 +1,5 @@
 {
-  "name": "tsn-app-launcher",
+  "name": "tsn-launcher",
   "version": "2.0.0",
   "private": true,
   "description": "Static GitHub Pages launcher for the TSN web app",
